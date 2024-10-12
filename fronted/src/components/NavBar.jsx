@@ -25,7 +25,10 @@ const NavbarComponent = ({ onCreatePayment, notifications }) => {
 
   return (
     <>
-      <BootstrapNavbar expand="lg" className="bg-dark text-light rounded-navbar">
+      <BootstrapNavbar
+        expand="lg"
+        className="bg-dark text-light rounded-navbar"
+      >
         <Container fluid className="px-3">
           <BootstrapNavbar.Brand
             href="#home"
@@ -116,17 +119,13 @@ const NavbarComponent = ({ onCreatePayment, notifications }) => {
         </Container>
       </BootstrapNavbar>
 
-      <Modal
-        show={showModal}
-        onHide={handleCloseModal}
-        centered
-        size="md"
-      >
+      <Modal show={showModal} onHide={handleCloseModal} centered size="md">
         <Modal.Header closeButton>
           <Modal.Title>Payment</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: "600px", overflowY: "hidden" }}>
-          <CreatePaymentForm title="Create Payment" /> {/* Render the form inside the modal */}
+          <CreatePaymentForm title="Create Payment" />{" "}
+          {/* Render the form inside the modal */}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

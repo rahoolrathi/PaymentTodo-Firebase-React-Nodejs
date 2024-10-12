@@ -2,8 +2,12 @@ import React from "react";
 import NavbarComponent from "./NavBar";
 import PaymentCard from "./Paymentcard";
 import { Container, Row, Col } from "react-bootstrap";
-
+import { useLocation } from "react-router-dom";
 const Mainpage = () => {
+  const location = useLocation();
+  const { token } = location.state || {}; // Access token from state
+
+  console.log("Auth Token:", token);
   const notifications = [
     { message: "Payment due for Invoice #123", dueDate: "10/15/2024" },
     { message: "Payment received for Invoice #456", dueDate: "10/12/2024" },
@@ -42,7 +46,9 @@ const Mainpage = () => {
       />
       {/* Ensure there is no top margin or padding in the container */}
       <Container fluid className="mt-2">
-        <Row className="d-flex justify-content-start"> {/* Align items to the start */}
+        <Row className="d-flex justify-content-start">
+          {" "}
+          {/* Align items to the start */}
           {payments.map((payment, index) => (
             <Col key={index} md="auto" className="mb-4">
               <PaymentCard
