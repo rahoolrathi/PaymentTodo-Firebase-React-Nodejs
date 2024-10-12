@@ -8,20 +8,21 @@ const {
 } = require("../validations/todoValidator.js");
 
 // Add new payment
-const addPaymentTodo = async (req, res, next) => {
+const addPaymentTodo = async (req, res) => {
   try {
-    const { error } = createPaymentValidator.validate(req.body);
+    const body = parseBody(req.body);
+    const { error } = createPaymentValidator.validate(body);
+    console.log("-----------", error);
     if (error) {
-      return generateResponse(
-        null,
-        error.details[0].message,
-        res,
-        STATUS_CODE.BAD_REQUEST
-      );
+      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+        status: false,
+        statusCode: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        message: error.details[0].message,
+      });
     }
 
-    const { title, description, dueDate, status } = parseBody(req.body);
-    const userId = req.user.id;
+    const { title, description, dueDate, status } = body;
+    const userId = req.user.uid;
     const result = await PaymentTodo.addPayment(
       title,
       description,
@@ -29,6 +30,13 @@ const addPaymentTodo = async (req, res, next) => {
       userId,
       status
     );
+    if (!result) {
+      return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+        status: false,
+        message: "Something went wrong",
+      });
+    }
+
     return generateResponse(
       result,
       "Payment added successfully",
@@ -36,65 +44,96 @@ const addPaymentTodo = async (req, res, next) => {
       STATUS_CODE.CREATED
     );
   } catch (error) {
-    next(error);
+    console.error("Internal Server Error:", error); // Log the error for debugging
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };
 
 // Soft delete a payment
-const softDeletePaymentTodo = async (req, res, next) => {
+const softDeletePaymentTodo = async (req, res) => {
   try {
-    const { error } = idValidator.validate({ paymentId: req.params.paymentId });
+    const id = req.params.paymentId;
+    console.log("------", req.params);
+
+    // Validate the payment ID
+    const { error } = idValidator.validate({ paymentId: id });
     if (error) {
-      return generateResponse(
-        null,
-        error.details[0].message,
-        res,
-        STATUS_CODE.BAD_REQUEST
-      );
+      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+        status: false,
+        statusCode: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        message: error.details[0].message,
+      });
     }
 
-    const { paymentId } = parseBody(req.params); // Parse the paymentId from req.params
-    const result = await PaymentTodo.softDelete(paymentId);
+    // Check if the payment exists
+    const payment = await PaymentTodo.getPaymentById(id);
+    if (!payment) {
+      return res.status(STATUS_CODE.NOT_FOUND).json({
+        status: false,
+        message: "Payment not found",
+      });
+    }
+
+    // Check if the payment is already deleted
+    if (payment.deletedAt) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        status: false,
+        message: "Payment already deleted",
+      });
+    }
+
+    // Proceed to soft delete the payment
+    const result = await PaymentTodo.softDelete(id);
     return generateResponse(
       result,
-      "Payment soft deleted successfully",
+      "Payment deleted successfully",
       res,
       STATUS_CODE.OK
     );
   } catch (error) {
-    next(error);
+    console.error("Internal Server Error:", error); // Log the error for debugging
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };
 
 // Edit payment
-const editPaymentTodo = async (req, res, next) => {
+const editPaymentTodo = async (req, res) => {
   try {
-    const { error } = updatePaymentValidator.validate(req.body);
+    const body = parseBody(req.body);
+    const { paymentId, ...updatedData } = body;
+
+    if (!Object.keys(updatedData).length) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        status: false,
+        message: "Invalid data",
+      });
+    }
+
+    const { error } = updatePaymentValidator.validate(updatedData);
     if (error) {
-      return generateResponse(
-        null,
-        error.details[0].message,
-        res,
-        STATUS_CODE.BAD_REQUEST
-      );
+      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+        status: false,
+        statusCode: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        message: error.details[0].message,
+      });
     }
 
-    const { error: idError } = idValidator.validate({
-      paymentId: req.params.paymentId,
-    });
-    if (idError) {
-      return generateResponse(
-        null,
-        idError.details[0].message,
-        res,
-        STATUS_CODE.BAD_REQUEST
-      );
+    // First, find if the payment exists by paymentId
+    const payment = await PaymentTodo.getPaymentById(paymentId);
+    if (!payment || payment.deletedAt) {
+      return res.status(STATUS_CODE.NOT_FOUND).json({
+        status: false,
+        message: "Payment not found or already deleted",
+      });
     }
 
-    const { paymentId } = parseBody(req.params); // Parse paymentId from req.params
-    const updatedData = parseBody(req.body); // Parse body for updated data
     const result = await PaymentTodo.editPayment(paymentId, updatedData);
-
     return generateResponse(
       result,
       "Payment updated successfully",
@@ -102,15 +141,26 @@ const editPaymentTodo = async (req, res, next) => {
       STATUS_CODE.OK
     );
   } catch (error) {
-    next(error);
+    console.error("Internal Server Error:", error); // Log the error for debugging
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };
 
 // Get all payments by user ID
-const getPaymentsTodoByUserId = async (req, res, next) => {
+const getPaymentsTodoByUserId = async (req, res) => {
   try {
-    const userId = req.user.id; // Retrieve userId from req.user
+    const userId = req.user.uid;
     const payments = await PaymentTodo.getAllPaymentsByUserId(userId);
+
+    if (!payments.length) {
+      return res.status(STATUS_CODE.NOT_FOUND).json({
+        status: false,
+        message: "No payments found",
+      });
+    }
 
     return generateResponse(
       payments,
@@ -119,25 +169,34 @@ const getPaymentsTodoByUserId = async (req, res, next) => {
       STATUS_CODE.OK
     );
   } catch (error) {
-    next(error);
+    console.error("Internal Server Error:", error); // Log the error for debugging
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };
 
 // Get payment by ID
-const getPaymentTodoById = async (req, res, next) => {
+const getPaymentTodoById = async (req, res) => {
   try {
-    const { error } = idValidator.validate({ paymentId: req.params.paymentId });
+    const id = req.params.paymentId;
+    const { error } = idValidator.validate({ paymentId: id });
     if (error) {
-      return generateResponse(
-        null,
-        error.details[0].message,
-        res,
-        STATUS_CODE.BAD_REQUEST
-      );
+      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+        status: false,
+        statusCode: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        message: error.details[0].message,
+      });
     }
 
-    const { paymentId } = parseBody(req.params); // Parse the paymentId from req.params
-    const payment = await PaymentTodo.getPaymentById(paymentId);
+    const payment = await PaymentTodo.getPaymentById(id);
+    if (!payment || payment.deletedAt) {
+      return res.status(STATUS_CODE.NOT_FOUND).json({
+        status: false,
+        message: "Payment not found or already deleted",
+      });
+    }
 
     return generateResponse(
       payment,
@@ -146,7 +205,11 @@ const getPaymentTodoById = async (req, res, next) => {
       STATUS_CODE.OK
     );
   } catch (error) {
-    next(error);
+    console.error("Internal Server Error:", error); // Log the error for debugging
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
 };
 

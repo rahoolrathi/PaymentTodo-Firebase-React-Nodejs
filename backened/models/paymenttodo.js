@@ -1,7 +1,5 @@
 const { db } = require("../firebaseAdmin");
 const { PaymentStatus } = require("../utils/constant");
-const { v4: uuidv4 } = require("uuid");
-
 class PaymentTodo {
   constructor(
     title,
@@ -10,7 +8,6 @@ class PaymentTodo {
     userId,
     status = PaymentStatus.UNPAID
   ) {
-    this.paymentId = uuidv4();
     this.title = title;
     this.description = description;
     this.dueDate = dueDate;
@@ -25,13 +22,11 @@ class PaymentTodo {
     description,
     dueDate,
     userId,
-    status = PaymentStatus.UNPAID
+    status = "UNPAID"
   ) {
-    const paymentId = uuidv4();
     const createdAt = new Date();
     try {
-      await db.collection("payments").doc(paymentId).set({
-        paymentId: paymentId,
+      const docRef = await db.collection("payments").add({
         userId: userId,
         title: title,
         description: description,
@@ -40,12 +35,11 @@ class PaymentTodo {
         createdAt: createdAt,
         deletedAt: null,
       });
-      return { message: "Payment added successfully" };
+      return { message: "Payment added successfully", id: docRef.id };
     } catch (error) {
       throw new Error("Error adding payment: " + error.message);
     }
   }
-
   // Soft delete a payment by setting deletedAt timestamp
   static async softDelete(paymentId) {
     try {
@@ -81,6 +75,7 @@ class PaymentTodo {
       const paymentsRef = db.collection("payments");
       const querySnapshot = await paymentsRef
         .where("userId", "==", userId)
+        .where("deletedAt", "==", null) // Exclude soft-deleted payments
         .get(); // Query for user's payments
       const payments = [];
 
@@ -101,7 +96,7 @@ class PaymentTodo {
       const snapshot = await paymentRef.get();
 
       if (!snapshot.exists) {
-        throw new Error("Payment not found");
+        return null;
       }
 
       return { id: snapshot.id, ...snapshot.data() };

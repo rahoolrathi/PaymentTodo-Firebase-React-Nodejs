@@ -23,7 +23,7 @@ class PaymentTodoAPI {
 
     router.delete("/:paymentId", authMiddleware(), softDeletePaymentTodo);
 
-    router.put("/:paymentId", authMiddleware(), editPaymentTodo);
+    router.put("/", authMiddleware(), editPaymentTodo);
 
     router.get("/", authMiddleware(), getPaymentsTodoByUserId);
 
