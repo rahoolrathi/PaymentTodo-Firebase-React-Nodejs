@@ -10,6 +10,7 @@ const {
 } = require("../controller/paymenttodo");
 const authMiddleware = require("../middleware/Auth.js");
 
+//setup paymenttodo routes
 class PaymentTodoAPI {
   constructor() {
     this.router = router;
@@ -19,6 +20,7 @@ class PaymentTodoAPI {
   setupRoutes() {
     const router = this.router;
 
+    //added auth middlware in all routes
     router.post("/", authMiddleware(), addPaymentTodo);
 
     router.delete("/:paymentId", authMiddleware(), softDeletePaymentTodo);

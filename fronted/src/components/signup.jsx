@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "..//firebase"; // Your Firebase config
+import { auth, messaging } from "../firebase"; // Your Firebase config
+import { getToken } from "firebase/messaging";
 import {
   validateFullName,
   validateEmail,
@@ -14,7 +15,63 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [fcmToken, setFcmToken] = useState("");
   const navigate = useNavigate();
+  const vapidKey =
+    "BDt-BJD1KRCT9djFmI2NC7GulE9VBY-6KLyPQ_GlX_mor-L6idVj0niMhCsyfv-t-qSGwI1EWDYWdLrjMu_hAcM";
+  useEffect(() => {
+    const fetchFcmToken = async () => {
+      try {
+        const token = await getToken(messaging, { vapidKey: vapidKey });
+        console.log("-----------fcm", token);
+        if (token) {
+          setFcmToken(token);
+        } else {
+          console.error(
+            "No registration token available. Request permission to generate one."
+          );
+        }
+      } catch (error) {
+        console.error("An error occurred while retrieving token. ", error);
+      }
+    };
+
+    fetchFcmToken();
+  }, []);
+
+  const sendFcmTokenToServer = async (fcmToken) => {
+    try {
+      // Get Firebase auth token from localStorage
+      const authToken = localStorage.getItem("authToken");
+      // Prepare the data to send to the server
+      const payload = {
+        fcmToken: fcmToken,
+      };
+
+      // Make the POST request to the server
+      const response = await fetch(
+        "http://localhost:3001/api/user/save-fcm-token",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Send Firebase auth token in header
+          },
+          body: JSON.stringify(payload), // Convert the payload to JSON
+        }
+      );
+
+      if (response.ok) {
+        console.log("FCM token successfully sent to the server.");
+      } else {
+        console.error(
+          "Failed to send FCM token to the server. Status:",
+          response.status
+        );
+      }
+    } catch (error) {
+      console.error("Error while sending FCM token to the server:", error);
+    }
+  };
 
   const handleSignup = async () => {
     // Validate inputs using validation functions
@@ -45,6 +102,11 @@ const Signup = () => {
       await updateProfile(user, { displayName: fullName });
       const token = await userCredential.user.getIdToken();
       localStorage.setItem("authToken", token);
+      if (fcmToken) {
+        await sendFcmTokenToServer(fcmToken);
+      } else {
+        console.error("FCM Token is not available.");
+      }
       navigate("/main");
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {

@@ -1,6 +1,7 @@
 const { admin } = require("../firebaseAdmin.js");
 const { STATUS_CODE } = require("../utils/constant.js");
 
+//defined auth middleware it will decode token from auth header and get userid
 const authMiddleware = () => {
   return async (req, res, next) => {
     const authHeader = req.header("Authorization");

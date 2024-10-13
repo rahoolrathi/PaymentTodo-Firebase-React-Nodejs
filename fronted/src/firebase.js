@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getMessaging } from "firebase/messaging";
+
 const firebaseConfig = {
   apiKey: "AIzaSyB1U4SQDi4ISA2SsHSkopKPiCEi8TK84Y4",
   authDomain: "paymentremainderapp.firebaseapp.com",
@@ -14,5 +16,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app); // Get Firebase Authentication instance
-
-export { auth };
+const messaging = getMessaging(app);
+export { auth, messaging };

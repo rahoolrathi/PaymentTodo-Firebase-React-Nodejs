@@ -12,6 +12,7 @@ const addPaymentTodo = async (req, res) => {
   try {
     const body = parseBody(req.body);
     console.log(body);
+    //validated body using joi library
     const { error } = createPaymentValidator.validate(body);
     console.log("-----------", error);
     if (error) {
