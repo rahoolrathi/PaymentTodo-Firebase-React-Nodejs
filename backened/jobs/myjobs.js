@@ -1,0 +1,10 @@
+// cronJobs.js
+const cron = require("node-cron");
+const { notifyUnpaidPayments } = require("../controller/notifactions");
+//set corn job now it will run in every 24 hours
+cron.schedule("0 0 * * *", () => {
+  console.log("Running cron job to notify unpaid payments...");
+  notifyUnpaidPayments();
+});
+
+module.exports = cron;

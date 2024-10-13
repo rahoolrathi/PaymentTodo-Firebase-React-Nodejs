@@ -1,6 +1,7 @@
 const express = require("express");
 const API = require("./api");
 const cors = require("cors");
+const cron = require("./jobs/myjobs");
 require("dotenv").config();
 const PORT = process.env.PORT | 3001;
 const app = express();

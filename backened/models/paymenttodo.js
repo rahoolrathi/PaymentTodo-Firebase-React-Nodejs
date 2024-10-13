@@ -104,6 +104,26 @@ class PaymentTodo {
       throw new Error("Error fetching payment: " + error.message);
     }
   }
+
+  static async getUnpaidPayments() {
+    try {
+      const paymentsRef = db.collection("payments");
+      const querySnapshot = await paymentsRef
+        .where("status", "==", PaymentStatus.UNPAID)
+        .where("deletedAt", "==", null)
+        .get();
+
+      const unpaidPayments = [];
+
+      querySnapshot.forEach((doc) => {
+        unpaidPayments.push({ id: doc.id, ...doc.data() });
+      });
+
+      return unpaidPayments;
+    } catch (error) {
+      throw new Error("Error fetching unpaid payments: " + error.message);
+    }
+  }
 }
 
 module.exports = PaymentTodo;
