@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, messaging } from "../firebase"; // Your Firebase config
+import { auth, messaging, generateToken } from "../firebase"; // Your Firebase config
 import { getToken } from "firebase/messaging";
+import axios from "axios";
 import {
   validateFullName,
   validateEmail,
@@ -35,7 +36,7 @@ const Signup = () => {
         console.error("An error occurred while retrieving token. ", error);
       }
     };
-
+    generateToken();
     fetchFcmToken();
   }, []);
 
@@ -49,18 +50,18 @@ const Signup = () => {
       };
 
       // Make the POST request to the server
-      const response = await fetch(
+      const response = await axios.post(
         "http://localhost:3001/api/user/save-fcm-token",
+        payload,
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${authToken}`, // Send Firebase auth token in header
           },
-          body: JSON.stringify(payload), // Convert the payload to JSON
+          // Convert the payload to JSON
         }
       );
 
-      if (response.ok) {
+      if (response.status === 200) {
         console.log("FCM token successfully sent to the server.");
       } else {
         console.error(

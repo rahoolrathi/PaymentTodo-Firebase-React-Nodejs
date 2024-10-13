@@ -3,6 +3,7 @@ const { saveFcmToken } = require("../models/user");
 
 const handleSaveFcmToken = async (req, res) => {
   const { fcmToken } = req.body;
+  console.log("-------", fcmToken);
   const userId = req.user.uid;
   if (!fcmToken) {
     return res.status(400).send("FCM token are required.");

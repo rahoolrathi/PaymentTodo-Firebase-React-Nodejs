@@ -129,7 +129,8 @@ const Mainpage = () => {
   useEffect(() => {
     fetchPayments();
     fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, 86400000);
+    const intervalId = setInterval(fetchNotifications, 60000); // Run every minute (60,000 milliseconds)
+
     return () => clearInterval(intervalId);
   }, [token]);
 

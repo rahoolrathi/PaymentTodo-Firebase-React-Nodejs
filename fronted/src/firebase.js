@@ -17,4 +17,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app); // Get Firebase Authentication instance
 const messaging = getMessaging(app);
-export { auth, messaging };
+const generateToken = async () => {
+  const premission = await Notification.requestPermission();
+  console.log(premission);
+};
+export { auth, messaging, generateToken };
