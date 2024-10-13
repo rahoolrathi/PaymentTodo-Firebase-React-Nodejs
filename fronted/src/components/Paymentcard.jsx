@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import CreatePaymentForm from "./createpaymentForm"; // Importing your unchanged CreatePaymentForm
 
-const PaymentCard = ({ title, description, dueDate, status }) => {
+const PaymentCard = ({ id, title, description, dueDate, status, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
 
   const handleEditClick = () => {
@@ -12,10 +12,12 @@ const PaymentCard = ({ title, description, dueDate, status }) => {
   const handleCloseModal = () => {
     setShowModal(false); // Close the modal
   };
-
+  const handleDeleteClick = () => {
+    onDelete(id); // Call the delete function passed as a prop
+  };
   return (
     <>
-      <Card className="mb-3" style={{ width: "100%" }}>
+      <Card className="mb-3" style={{ width: "100%" }} id={id}>
         <Card.Body>
           <Card.Title>{title}</Card.Title>
           <Card.Text>{description}</Card.Text>
@@ -28,10 +30,16 @@ const PaymentCard = ({ title, description, dueDate, status }) => {
             </div>
           </div>
           <div className="d-flex justify-content-end mt-3">
-            <Button variant="primary" className="me-2" onClick={handleEditClick}>
+            <Button
+              variant="primary"
+              className="me-2"
+              onClick={handleEditClick}
+            >
               Edit
             </Button>
-            <Button variant="danger">Delete</Button>
+            <Button variant="danger" onClick={handleDeleteClick}>
+              Delete
+            </Button>
           </div>
         </Card.Body>
       </Card>
@@ -41,7 +49,7 @@ const PaymentCard = ({ title, description, dueDate, status }) => {
           <Modal.Title>Payment</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <CreatePaymentForm title="Edit Payment" />
+          <CreatePaymentForm title="Edit Payment" />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

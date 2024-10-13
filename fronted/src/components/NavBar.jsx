@@ -11,17 +11,22 @@ import {
 import { BellFill } from "react-bootstrap-icons";
 import CreatePaymentForm from "./createpaymentForm"; // Ensure correct path
 
-const NavbarComponent = ({ onCreatePayment, notifications }) => {
+const NavbarComponent = ({
+  onCreatePayment,
+  notifications,
+  creatingPayment,
+  setError,
+}) => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [showModal, setShowModal] = useState(false);
 
   const handleToggle = () => setShowDropdown(!showDropdown);
 
   const handleCreatePayment = () => {
-    setShowModal(true); // Show modal when Create Payment button is clicked
+    setShowModal(true);
   };
 
-  const handleCloseModal = () => setShowModal(false); // Close modal
+  const handleCloseModal = () => setShowModal(false);
 
   return (
     <>
@@ -83,7 +88,6 @@ const NavbarComponent = ({ onCreatePayment, notifications }) => {
                     </Badge>
                   )}
                 </Dropdown.Toggle>
-
                 <Dropdown.Menu
                   align="end"
                   className="dropdown-menu-end"
@@ -124,8 +128,13 @@ const NavbarComponent = ({ onCreatePayment, notifications }) => {
           <Modal.Title>Payment</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: "600px", overflowY: "hidden" }}>
-          <CreatePaymentForm title="Create Payment" />{" "}
-          {/* Render the form inside the modal */}
+          <CreatePaymentForm
+            title="Create Payment"
+            onSubmit={onCreatePayment}
+            creatingPayment={creatingPayment} // Pass creatingPayment state
+            setError={setError} // Pass setError function
+            handleCloseModal={handleCloseModal}
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

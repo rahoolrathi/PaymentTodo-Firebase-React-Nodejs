@@ -7,20 +7,62 @@ import axios from "axios"; // Import axios for API requests
 
 const Mainpage = () => {
   const location = useLocation();
-  const { token } = location.state || {}; // Access token from state
+  const { token } = location.state || {};
 
   console.log("Auth Token:", token);
   const [payments, setPayments] = useState([]); // State to hold payments
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // State to hold error message
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [creatingPayment, setCreatingPayment] = useState(false);
   const notifications = [
     { message: "Payment due for Invoice #123", dueDate: "10/15/2024" },
     { message: "Payment received for Invoice #456", dueDate: "10/12/2024" },
   ];
 
-  const handleCreatePayment = () => {
-    console.log("Create Payment button clicked!");
+  const handleCreatePayment = async (formData) => {
+    setCreatingPayment(true); // Start loading while creating payment
+    try {
+      const modifiedFormData = {
+        ...formData, // Spread the existing form data
+        status: formData.paymentStatus, // Rename paymentStatus to status
+      };
+
+      delete modifiedFormData.paymentStatus;
+      await axios.post(
+        "http://localhost:3001/api/paymenttodo",
+        modifiedFormData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the headers
+          },
+        }
+      );
+      await fetchPayments(); // Fetch payments again after successful creation
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      setError(error.response?.data?.message || "Error creating payment.");
+    } finally {
+      setCreatingPayment(false); // Stop loading regardless of success or error
+    }
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (window.confirm("Are you sure you want to delete this payment?")) {
+      try {
+        await axios.delete(
+          `http://localhost:3001/api/paymenttodo/${paymentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Pass the token in the headers
+            },
+          }
+        );
+        await fetchPayments(); // Fetch payments again after successful deletion
+      } catch (error) {
+        console.error("Error deleting payment:", error);
+        setError(error.response?.data?.message || "Error deleting payment."); // Set error message
+      }
+    }
   };
 
   // Fetch payments from the API
@@ -55,43 +97,46 @@ const Mainpage = () => {
       <NavbarComponent
         onCreatePayment={handleCreatePayment}
         notifications={notifications}
+        setError={setError}
       />
       <Container fluid className="mt-2">
-        {loading ? ( // Display loader while loading
+        {loading ? (
           <Row
             className="justify-content-center align-items-center"
             style={{ minHeight: "80vh" }}
           >
             <Spinner animation="border" />
           </Row>
-        ) : error ? ( // Display error if there is one
+        ) : error ? (
           <Row className="justify-content-center">
             <Col md={6}>
               <Alert variant="danger">
-                {error} {/* Display the error message */}
+                {error} {}
               </Alert>
             </Col>
           </Row>
         ) : (
           <Row className="d-flex justify-content-start">
             {" "}
-            {/* Align items to the start */}
-            {payments.length > 0 ? ( // Check if there are payments
+            {}
+            {payments.length > 0 ? (
               payments.map((payment, index) => (
                 <Col key={index} md="auto" className="mb-4">
                   <PaymentCard
+                    id={payment.id}
                     title={payment.title}
                     description={payment.description}
                     dueDate={payment.dueDate}
                     status={payment.status}
+                    onDelete={handleDeletePayment}
                   />
                 </Col>
               ))
             ) : (
               <Col className="text-center">
                 {" "}
-                {/* Handle case when no payments are available */}
-                <h5>No payments available</h5>
+                {}
+                <h5>No payments available.Create a new payment!</h5>
               </Col>
             )}
           </Row>

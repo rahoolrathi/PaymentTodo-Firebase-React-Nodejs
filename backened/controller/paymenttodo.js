@@ -11,6 +11,7 @@ const {
 const addPaymentTodo = async (req, res) => {
   try {
     const body = parseBody(req.body);
+    console.log(body);
     const { error } = createPaymentValidator.validate(body);
     console.log("-----------", error);
     if (error) {

@@ -10,12 +10,12 @@ const createPaymentValidator = Joi.object({
     "string.empty": "description cannot be empty.",
   }),
   dueDate: Joi.string()
-    .pattern(/^\d{2}-\d{2}-\d{4}$/)
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .required()
     .messages({
       "any.required": "date is required.",
       "string.empty": "date cannot be empty.",
-      "string.pattern.base": "date must be in the format DD-MM-YYYY.",
+      "string.pattern.base": "date must be in the format YYYY_MM_DD.",
     }),
   status: Joi.string().valid("UNPAID", "PAID").default("UNPAID"),
 }).messages({
@@ -32,12 +32,12 @@ const updatePaymentValidator = Joi.object({
     "string.empty": "description cannot be empty.",
   }),
   dueDate: Joi.string()
-    .pattern(/^\d{2}-\d{2}-\d{4}$/)
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .required()
     .messages({
       "any.required": "date is required.",
       "string.empty": "date cannot be empty.",
-      "string.pattern.base": "date must be in the format DD-MM-YYYY.",
+      "string.pattern.base": "date must be in the format YYYY-MM-DD.",
     }),
   status: Joi.string().valid("UNPAID", "PAID").messages({
     "any.required": "status is required.",

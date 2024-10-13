@@ -4,7 +4,7 @@ const { STATUS_CODE } = require("../utils/constant.js");
 const authMiddleware = () => {
   return async (req, res, next) => {
     const authHeader = req.header("Authorization");
-    console.log("------", authHeader);
+    //console.log("------", authHeader);
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({
         message: "Unauthorized request! Token is missing or invalid.",
