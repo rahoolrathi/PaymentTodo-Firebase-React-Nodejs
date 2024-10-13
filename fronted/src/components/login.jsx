@@ -25,7 +25,8 @@ const Login = () => {
         password
       );
       const token = await userCredential.user.getIdToken();
-      navigate("/main", { state: { token } });
+      localStorage.setItem("authToken", token);
+      navigate("/main");
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         setError("No user found with this email.");

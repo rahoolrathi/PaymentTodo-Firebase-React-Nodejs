@@ -44,8 +44,8 @@ const Signup = () => {
       // Update the user's profile with the full name
       await updateProfile(user, { displayName: fullName });
       const token = await userCredential.user.getIdToken();
-      alert("Signup successful!");
-      navigate("/main", { state: { token } });
+      localStorage.setItem("authToken", token);
+      navigate("/main");
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         setError("This email is already in use.");

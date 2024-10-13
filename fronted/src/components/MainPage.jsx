@@ -6,18 +6,14 @@ import { useLocation } from "react-router-dom";
 import axios from "axios"; // Import axios for API requests
 
 const Mainpage = () => {
-  const location = useLocation();
-  const { token } = location.state || {};
+  const token = localStorage.getItem("authToken");
 
   console.log("Auth Token:", token);
   const [payments, setPayments] = useState([]); // State to hold payments
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
-  const notifications = [
-    { message: "Payment due for Invoice #123", dueDate: "10/15/2024" },
-    { message: "Payment received for Invoice #456", dueDate: "10/12/2024" },
-  ];
+  const [notifications, setNotifications] = useState([]);
 
   const handleEditPayment = async (paymentId, updatedData) => {
     try {
@@ -38,6 +34,26 @@ const Mainpage = () => {
     } catch (error) {
       console.error("Error editing payment:", error);
       setError(error.response?.data?.message || "Error editing payment.");
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/notifaction/", // Adjust the endpoint accordingly
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the headers
+          },
+        }
+      );
+      console.log(response.data);
+      setNotifications(response.data); // Set notifications from API response
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setError(
+        error.response?.data?.message || "Error fetching notifications."
+      );
     }
   };
 
@@ -111,8 +127,11 @@ const Mainpage = () => {
   };
 
   useEffect(() => {
-    fetchPayments(); // Fetch payments on component mount
-  }, [token]); // Add token as a dependency
+    fetchPayments();
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 86400000);
+    return () => clearInterval(intervalId);
+  }, [token]);
 
   return (
     <>
