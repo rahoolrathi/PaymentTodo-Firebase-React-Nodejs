@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomButton from "./CustomButton";
 import CustomInput from "./CustomInput"; // Assuming this is a reusable input component
 
@@ -8,6 +8,7 @@ const CreatePaymentForm = ({
   creatingPayment,
   setError,
   handleCloseModal,
+  initialData,
 }) => {
   const [formData, setFormData] = useState({
     title: "",
@@ -26,7 +27,18 @@ const CreatePaymentForm = ({
       [name]: value,
     });
   };
-
+  useEffect(() => {
+    if (initialData) {
+      // Populate the form with existing payment data when editing
+      console.log(initialData);
+      setFormData({
+        title: initialData.title,
+        description: initialData.description,
+        dueDate: initialData.dueDate,
+        paymentStatus: initialData.status,
+      });
+    }
+  }, [initialData]);
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,7 +97,7 @@ const CreatePaymentForm = ({
           </select>
 
           <CustomButton type="submit" disabled={creatingPayment}>
-            {creatingPayment ? "Creating..." : "Create Payment"}
+            {creatingPayment ? "Creating..." : `${title}`}
           </CustomButton>
 
           {error && <div className="text-danger">{error}</div>}

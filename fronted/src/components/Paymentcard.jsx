@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import CreatePaymentForm from "./createpaymentForm"; // Importing your unchanged CreatePaymentForm
 
-const PaymentCard = ({ id, title, description, dueDate, status, onDelete }) => {
+const PaymentCard = ({
+  id,
+  title,
+  description,
+  dueDate,
+  status,
+  onDelete,
+  onEdit,
+}) => {
   const [showModal, setShowModal] = useState(false);
 
   const handleEditClick = () => {
@@ -13,8 +21,14 @@ const PaymentCard = ({ id, title, description, dueDate, status, onDelete }) => {
     setShowModal(false); // Close the modal
   };
   const handleDeleteClick = () => {
-    onDelete(id); // Call the delete function passed as a prop
+    onDelete(id);
   };
+
+  const handleEditSubmit = async (formData) => {
+    await onEdit(id, formData);
+    handleCloseModal();
+  };
+
   return (
     <>
       <Card className="mb-3" style={{ width: "100%" }} id={id}>
@@ -49,7 +63,11 @@ const PaymentCard = ({ id, title, description, dueDate, status, onDelete }) => {
           <Modal.Title>Payment</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <CreatePaymentForm title="Edit Payment" />
+          <CreatePaymentForm
+            title="Edit Payment"
+            initialData={{ title, description, dueDate, status }} // Pass the existing data
+            onSubmit={handleEditSubmit} // Handle submit
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

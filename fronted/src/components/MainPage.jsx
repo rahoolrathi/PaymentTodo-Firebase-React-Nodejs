@@ -19,6 +19,28 @@ const Mainpage = () => {
     { message: "Payment received for Invoice #456", dueDate: "10/12/2024" },
   ];
 
+  const handleEditPayment = async (paymentId, updatedData) => {
+    try {
+      const modifiedData = {
+        ...updatedData,
+        paymentId: paymentId,
+        status: updatedData.paymentStatus,
+      };
+
+      delete modifiedData.paymentStatus;
+      await axios.put("http://localhost:3001/api/paymenttodo/", modifiedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await fetchPayments();
+    } catch (error) {
+      console.error("Error editing payment:", error);
+      setError(error.response?.data?.message || "Error editing payment.");
+    }
+  };
+
   const handleCreatePayment = async (formData) => {
     setCreatingPayment(true); // Start loading while creating payment
     try {
@@ -129,6 +151,7 @@ const Mainpage = () => {
                     dueDate={payment.dueDate}
                     status={payment.status}
                     onDelete={handleDeletePayment}
+                    onEdit={handleEditPayment}
                   />
                 </Col>
               ))
