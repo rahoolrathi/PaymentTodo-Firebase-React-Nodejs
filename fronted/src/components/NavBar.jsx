@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Nav,
@@ -19,6 +20,7 @@ const NavbarComponent = ({
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleToggle = () => setShowDropdown(!showDropdown);
 
@@ -28,6 +30,9 @@ const NavbarComponent = ({
 
   const handleCloseModal = () => setShowModal(false);
 
+  const handleSignOut = () => {
+    navigate("/");
+  };
   return (
     <>
       <BootstrapNavbar
@@ -64,6 +69,14 @@ const NavbarComponent = ({
                 onClick={handleCreatePayment}
               >
                 Create Payment
+              </Button>
+
+              <Button
+                variant="success"
+                className="me-2"
+                onClick={handleSignOut}
+              >
+                SignOut
               </Button>
               <Dropdown show={showDropdown} onToggle={handleToggle}>
                 <Dropdown.Toggle
