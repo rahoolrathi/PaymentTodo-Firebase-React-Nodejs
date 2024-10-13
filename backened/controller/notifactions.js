@@ -1,7 +1,7 @@
 // Import necessary modules
 const NotificationModel = require("../models/notifactions");
 const PaymentTodo = require("../models/paymenttodo");
-const { admin, db } = require("./firebaseAdmin");
+const { admin, db } = require("../firebaseAdmin");
 
 const notifyUnpaidPayments = async () => {
   try {

@@ -1,5 +1,4 @@
 const { STATUS_CODE } = require("./constant.js");
-const {}
 exports.generateResponse = (
   data,
   message,
