@@ -4,7 +4,8 @@ import PaymentCard from "./Paymentcard";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap"; // Import Alert for error messages
 import { useLocation } from "react-router-dom";
 import axios from "axios"; // Import axios for API requests
-
+import { messaging } from "../firebase";
+import { onMessage } from "firebase/messaging";
 const Mainpage = () => {
   const token = localStorage.getItem("authToken");
 
@@ -14,6 +15,21 @@ const Mainpage = () => {
   const [error, setError] = useState(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  useEffect(() => {
+    const setupMessageListener = () => {
+      // Listen for foreground messages
+      onMessage(messaging, (payload) => {
+        console.log("Foreground message received: ", payload);
+        const { title, body } = payload.notification;
+
+        // Optionally show an alert or notification in the UI
+        alert(`Notification: ${title} - ${body}`);
+        fetchNotifications();
+      });
+    };
+
+    setupMessageListener();
+  }, [token]);
 
   const handleEditPayment = async (paymentId, updatedData) => {
     try {
