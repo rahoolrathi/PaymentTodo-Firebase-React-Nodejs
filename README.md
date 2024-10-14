@@ -32,15 +32,11 @@ The Payment Reminder App is a web application that allows users to manage their 
 - **UserToken:** Stores the FCM tokens for users to send push notifications.
 - **PaymentTodo:** Stores the user's payment todos with details such as title, description, due date, and status.
 
-## Setup
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/payment-reminder-app.git
-   
+## Setup   
 <ol>
   <li>
     <strong>Clone the repository:</strong>
-    <pre><code>git clone https://github.com/yourusername/payment-reminder-app.git</code></pre>
+    <pre><code>https://github.com/rahoolrathi/PaymentTodo-Firebase-React-Nodejs.git</code></pre>
   </li>
   <li>
     <strong>Navigate to the backend directory:</strong>
