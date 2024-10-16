@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { validateEmail, validatePassword } from "../validations"; // Import validation functions
@@ -8,6 +8,13 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      navigate("/main", { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async () => {
     // Validate inputs using validation functions
