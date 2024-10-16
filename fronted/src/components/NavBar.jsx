@@ -31,6 +31,7 @@ const NavbarComponent = ({
   const handleCloseModal = () => setShowModal(false);
 
   const handleSignOut = () => {
+    localStorage.removeItem("authToken");
     navigate("/");
   };
   return (
